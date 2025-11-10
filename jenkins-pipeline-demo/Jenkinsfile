@@ -1,69 +1,30 @@
 pipeline {
-  agent any
-  options {
-    timestamps()
-    skipDefaultCheckout(true)
-  }
-  environment {
-    VENV = 'venv'
-    SCANNER_HOME = tool 'sonar-scanner'
-  }
+    
+    agent any
 
-  stages {
+    stages {
 
-    stage('Git checkout') {
-      steps {
-        checkout scm
-      }
-    }
-
-    stage('Python build') {
-      steps {
-        sh '''
-          python3 -V
-          python3 -m venv ${VENV}
-          . ${VENV}/bin/activate
-          python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then
-            pip install -r requirements.txt
-          fi
-        '''
-      }
-    }
-
-    stage('Lint & Test') {
-      steps {
-        sh '''
-          . ${VENV}/bin/activate
-          pip install pytest flake8 pytest-cov
-          flake8 . || true
-          mkdir -p reports
-          pytest -q --junitxml=reports/junit.xml --cov=. --cov-report xml:coverage.xml || true
-        '''
-      }
-      post {
-        always {
-          junit 'reports/junit.xml'
-          archiveArtifacts artifacts: 'coverage.xml', allowEmptyArchive: true
+        stage("Git checkout") {
+            steps {
+                echo "Cloniing the Pythonn project source code from the GitHub repository"
+                git branch: 'main', url: 'https://github.com/falakdesai/python-onepiece-app'
+            }
         }
-      }
-    }
-
-    stage('SonarQube Analysis') {
-      when { expression { fileExists('sonar-project.properties') } }
-      steps {
-        withSonarQubeEnv('sonarqube-local') {
-          sh '''
-            ${SCANNER_HOME}/bin/sonar-scanner
-          '''
+        
+        stage("python build") {
+            steps {
+                echo "Building the Python application"
+                sh '''
+                rm -rf venv # Remove existing virtual environment if any
+                python -m venv venv
+                . venv/bin/activate
+                pip install -r requirements.txt
+                '''
+            }
         }
-      }
-    }
-  }
 
-  post {
-    always {
-      archiveArtifacts artifacts: '**/*.log', allowEmptyArchive: true
+        
+
     }
-  }
+
 }
