@@ -23,6 +23,17 @@ pipeline {
             }
         }
 
+        stage("Python test") {
+            steps {
+                echo "Running tests for the Python application"
+                sh '''
+                . venv/bin/activate
+                pytest app/tests/test_app.py
+                '''
+            }
+        }
+
+
         
 
     }
