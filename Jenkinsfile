@@ -57,7 +57,7 @@ pipeline {
                     sh '''
                     . venv/bin/activate
                     $SONARQUBE_SCANNER_HOME/bin/sonar-scanner \
-                    -Dsonar.projectKey=Jenkins \
+                    -Dsonar.projectKey= Jenkins \
                     -Dsonar.sources=. \
                     -Dsonarqualitygate.wait=false
                     '''
@@ -71,8 +71,8 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_PASSWORD')]) {
                     sh '''
                     echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin
-                    docker build -t falakdesai2/python-onepiece-app:latest .
-                    docker push falakdesai2/python-onepiece-app:latest
+                    docker build -t supneet123/python-onepiece-app:latest .
+                    docker push supneet123/python-onepiece-app:latest
                     '''
                 }
             }
@@ -83,7 +83,7 @@ pipeline {
                 echo "Performing security scan using Trivy"
                 sh '''
                 trivy image --format table --severity HIGH,CRITICAL \
-                --output trivy-report.txt falakdesai2/python-onepiece-app:latest
+                --output trivy-report.txt supneet123/python-onepiece-app:latest
                 '''
             }
             post {
